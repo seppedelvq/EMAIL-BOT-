@@ -80,3 +80,17 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
+
+body { font-family: Arial, Helvetica, sans-serif; background:#f6f8f5; color:#24392e; }
+[data-slot="sidebar-inset"] { background:#f6f8f5; }
+.post-select { min-height:40px; border:1px solid #dce4df; border-radius:8px; padding:8px 10px; background:white; font-size:14px; }
+.post-select:focus, input:focus, textarea:focus { outline:2px solid #70a58a; outline-offset:2px; }
+.post-notice { display:flex; gap:10px; align-items:center; margin-bottom:20px; border-width:1px; border-radius:10px; padding:14px; font-size:14px; }
+.post-settings-card { border-color:#e1e7e3; box-shadow:none; }
+.post-settings-card h2 { font-size:17px; font-weight:600; margin-bottom:12px; }
+.post-settings-card p { font-size:13px; line-height:1.7; color:#67766c; }
+.post-label { display:block; font-size:13px; font-weight:500; margin-top:18px; }
+.post-label input, .post-label select, .post-label textarea { margin-top:8px; background:white; }
+.post-check { display:flex; gap:10px; align-items:flex-start; font-size:14px; margin:16px 0; line-height:1.6; }
+.post-check input { margin-top:4px; width:17px; height:17px; accent-color:#245c43; flex-shrink:0; }
+button, a, select, input[type=checkbox] { touch-action:manipulation; }

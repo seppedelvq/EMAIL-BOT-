@@ -6,6 +6,8 @@ on:
 
 jobs:
   publish:
+    # A fork must explicitly opt in before publishing the upstream npm package name.
+    if: github.repository == 'rafapetter/emai'
     runs-on: ubuntu-latest
 
     permissions:
@@ -17,7 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
           cache: npm
 

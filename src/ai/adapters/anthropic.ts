@@ -94,8 +94,7 @@ export class AnthropicAdapter extends BaseLLMAdapter {
         tools: [
           {
             name: 'structured_output',
-            description:
-              'Return the structured data extracted from the input.',
+            description: 'Return the structured data extracted from the input.',
             input_schema: jsonSchema,
           },
         ],
@@ -178,7 +177,7 @@ export class AnthropicAdapter extends BaseLLMAdapter {
   }
 }
 
-function zodToJsonSchema(schema: z.ZodType): Record<string, unknown> {
+function zodToJsonSchema(schema: z.core.$ZodType): Record<string, unknown> {
   if (schema instanceof z.ZodObject) {
     const shape = schema.shape as Record<string, z.ZodType>;
     const properties: Record<string, Record<string, unknown>> = {};
@@ -227,7 +226,7 @@ function zodToJsonSchema(schema: z.ZodType): Record<string, unknown> {
   }
 
   if (schema instanceof z.ZodUnion) {
-    const options = (schema as z.ZodUnion<z.ZodUnionOptions>).options as unknown as z.ZodType[];
+    const options = schema.options;
     return { anyOf: options.map(zodToJsonSchema) };
   }
 
@@ -239,7 +238,7 @@ function zodToJsonSchema(schema: z.ZodType): Record<string, unknown> {
   if (schema instanceof z.ZodRecord) {
     return {
       type: 'object',
-      additionalProperties: zodToJsonSchema(schema.valueSchema),
+      additionalProperties: zodToJsonSchema(schema.valueType),
     };
   }
 

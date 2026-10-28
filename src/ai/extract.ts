@@ -109,7 +109,9 @@ Return a JSON object with:
 }
 
 function buildAttachmentContent(attachment: ParsedAttachment): string {
-  const parts: string[] = [`[File: ${attachment.filename} (${attachment.contentType})]`];
+  const parts: string[] = [
+    `[File: ${attachment.filename} (${attachment.contentType})]`,
+  ];
 
   if (attachment.text) {
     parts.push(attachment.text);
@@ -121,12 +123,16 @@ function buildAttachmentContent(attachment: ParsedAttachment): string {
     for (const table of attachment.tables) {
       const header = table.headers.join(' | ');
       const rows = table.rows.map((r) => r.join(' | ')).join('\n');
-      parts.push(`Table${table.sheetName ? ` (${table.sheetName})` : ''}:\n${header}\n${rows}`);
+      parts.push(
+        `Table${table.sheetName ? ` (${table.sheetName})` : ''}:\n${header}\n${rows}`,
+      );
     }
   }
 
   if (attachment.structuredData) {
-    parts.push(`Structured data:\n${JSON.stringify(attachment.structuredData, null, 2)}`);
+    parts.push(
+      `Structured data:\n${JSON.stringify(attachment.structuredData, null, 2)}`,
+    );
   }
 
   return parts.join('\n\n');
@@ -143,8 +149,7 @@ function describeSchema(schema: z.ZodType, prefix = ''): string {
       const type = getZodTypeName(value);
       lines.push(`- ${path}: ${type}${optional}`);
 
-      const inner =
-        value instanceof z.ZodOptional ? value.unwrap() : value;
+      const inner = value instanceof z.ZodOptional ? value.unwrap() : value;
       if (inner instanceof z.ZodObject) {
         lines.push(describeSchema(inner, path));
       }
@@ -154,14 +159,17 @@ function describeSchema(schema: z.ZodType, prefix = ''): string {
   return lines.join('\n');
 }
 
-function getZodTypeName(schema: z.ZodType): string {
+function getZodTypeName(schema: z.core.$ZodType): string {
   if (schema instanceof z.ZodString) return 'string';
   if (schema instanceof z.ZodNumber) return 'number';
   if (schema instanceof z.ZodBoolean) return 'boolean';
-  if (schema instanceof z.ZodArray) return `array of ${getZodTypeName(schema.element)}`;
-  if (schema instanceof z.ZodEnum) return `enum(${(schema.options as string[]).join(', ')})`;
+  if (schema instanceof z.ZodArray)
+    return `array of ${getZodTypeName(schema.element)}`;
+  if (schema instanceof z.ZodEnum)
+    return `enum(${(schema.options as string[]).join(', ')})`;
   if (schema instanceof z.ZodOptional) return getZodTypeName(schema.unwrap());
-  if (schema instanceof z.ZodNullable) return `${getZodTypeName(schema.unwrap())} | null`;
+  if (schema instanceof z.ZodNullable)
+    return `${getZodTypeName(schema.unwrap())} | null`;
   if (schema instanceof z.ZodObject) return 'object';
   if (schema instanceof z.ZodRecord) return 'record';
   if (schema instanceof z.ZodDate) return 'date (ISO string)';

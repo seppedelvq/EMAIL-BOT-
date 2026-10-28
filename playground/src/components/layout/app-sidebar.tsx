@@ -1,189 +1,75 @@
 'use client';
-
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import {
-  Settings,
-  LayoutDashboard,
-  Mail,
-  MessageSquare,
-  Brain,
-  Tag,
-  FileText,
-  PenTool,
-  Database,
-  ArrowUpDown,
-  CheckSquare,
-  Search,
-  Paperclip,
-  Shield,
-  Activity,
-} from 'lucide-react';
+import { Mail, LayoutDashboard, Settings, Sparkles } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarSeparator,
+  SidebarMenuButton,
+  SidebarFooter,
+  useSidebar,
 } from '@/components/ui/sidebar';
-import { ConnectionStatus } from '@/components/playground/connection-status';
-
-const aiSubItems = [
-  { title: 'Classify', href: '/ai/classify', icon: Tag },
-  { title: 'Summarize', href: '/ai/summarize', icon: FileText },
-  { title: 'Compose', href: '/ai/compose', icon: PenTool },
-  { title: 'Extract', href: '/ai/extract', icon: Database },
-  { title: 'Priority', href: '/ai/priority', icon: ArrowUpDown },
-  { title: 'Actions', href: '/ai/actions', icon: CheckSquare },
-];
-
 export function AppSidebar() {
-  const pathname = usePathname();
-
+  const path = usePathname();
+  const { setOpenMobile } = useSidebar();
+  const [nl, setNl] = useState(true);
+  useEffect(() => {
+    const listener = (e: Event) => setNl((e as CustomEvent).detail !== 'en');
+    window.addEventListener('assistant-language', listener);
+    return () => window.removeEventListener('assistant-language', listener);
+  }, []);
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold">emai</span>
-          <span className="text-xs text-muted-foreground">playground</span>
-        </div>
-        <ConnectionStatus />
+    <Sidebar className="border-r border-[#e2e9e5]">
+      <SidebarHeader className="px-6 py-8">
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-[#174f40] text-white">
+            <Mail size={22} />
+          </span>
+          <span className="text-2xl font-semibold tracking-tight">
+            post<span className="text-[#42856b]">.</span>
+          </span>
+        </Link>
+        <p className="mt-3 text-xs text-muted-foreground">AI Mail Assistant</p>
       </SidebarHeader>
-
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/dashboard'}>
-                  <Link href="/dashboard">
-                    <LayoutDashboard className="size-4" />
-                    <span>Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/config'}>
-                  <Link href="/config">
-                    <Settings className="size-4" />
-                    <span>Configuration</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Email</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/emails'}>
-                  <Link href="/emails">
-                    <Mail className="size-4" />
-                    <span>Emails</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/threads'}>
-                  <Link href="/threads">
-                    <MessageSquare className="size-4" />
-                    <span>Threads</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupLabel>AI</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Brain className="size-4" />
-                  <span>AI Features</span>
-                </SidebarMenuButton>
-                <SidebarMenuSub>
-                  {aiSubItems.map((item) => (
-                    <SidebarMenuSubItem key={item.href}>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={pathname === item.href}
-                      >
-                        <Link href={item.href}>
-                          <item.icon className="size-3" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Tools</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/search'}>
-                  <Link href="/search">
-                    <Search className="size-4" />
-                    <span>Search</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === '/attachments'}
-                >
-                  <Link href="/attachments">
-                    <Paperclip className="size-4" />
-                    <span>Attachments</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/safety'}>
-                  <Link href="/safety">
-                    <Shield className="size-4" />
-                    <span>Safety</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/events'}>
-                  <Link href="/events">
-                    <Activity className="size-4" />
-                    <span>Events & Watch</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarContent className="px-3 py-5">
+        <SidebarMenu>
+          {[
+            { href: '/dashboard', name: 'Dashboard', icon: LayoutDashboard },
+            { href: '/emails', name: nl ? 'E-mails' : 'Emails', icon: Mail },
+            {
+              href: '/settings',
+              name: nl ? 'Instellingen' : 'Settings',
+              icon: Settings,
+            },
+          ].map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={path === item.href}
+                className="h-12 px-4 data-[active=true]:bg-[#e1eee7] data-[active=true]:text-[#174f40]"
+              >
+                <Link href={item.href} onClick={() => setOpenMobile(false)}>
+                  <item.icon />
+                  <span>{item.name}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter className="m-4 rounded-xl bg-[#eaf1ed] p-4 text-sm">
+        <Sparkles className="mb-2 text-[#31745b]" size={20} />
+        <b>{nl ? 'Meer rust. Meer overzicht.' : 'Less noise. More clarity.'}</b>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          {nl
+            ? 'Jij houdt de controle over je mailbox.'
+            : 'You stay in control of your inbox.'}
+        </p>
+      </SidebarFooter>
     </Sidebar>
   );
 }

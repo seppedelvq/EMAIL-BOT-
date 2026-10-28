@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [24]
 
     steps:
       - uses: actions/checkout@v4
@@ -34,3 +34,15 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Install local frontend
+        run: npm --prefix playground ci
+
+      - name: Type check frontend
+        run: npm --prefix playground run typecheck
+
+      - name: Build local assistant
+        run: npm --prefix playground run build
+        env:
+          ASSISTANT_SCHEDULER: '0'
+          NEXT_TELEMETRY_DISABLED: '1'

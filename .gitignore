@@ -7,3 +7,9 @@ coverage/
 .env.*
 *.tgz
 .DS_Store
+.assistant-data/
+*.db-wal
+*.db-shm
+
+!.env.example
+*.tsbuildinfo
