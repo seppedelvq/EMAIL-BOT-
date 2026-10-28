@@ -16,8 +16,17 @@ import type {
   EmailBody,
   EmailHeaders,
 } from '../core/types.js';
-import { tryImport, normalizeAddresses, formatEmailAddress, normalizeSubject } from '../core/utils.js';
-import { ProviderError, AuthenticationError, NotFoundError } from '../core/errors.js';
+import {
+  tryImport,
+  normalizeAddresses,
+  formatEmailAddress,
+  normalizeSubject,
+} from '../core/utils.js';
+import {
+  ProviderError,
+  AuthenticationError,
+  NotFoundError,
+} from '../core/errors.js';
 import { BaseProvider } from './base.js';
 
 interface GmailAPI {
@@ -27,30 +36,64 @@ interface GmailAPI {
 interface GmailService {
   users: {
     messages: {
-      list: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      get: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      send: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      trash: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      modify: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      batchModify: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
+      list: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      get: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      send: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      trash: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      modify: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      batchModify: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
     };
     threads: {
-      get: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
+      get: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
     };
     drafts: {
-      create: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      update: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      delete: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      get: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
+      create: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      update: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      delete: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      get: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
     };
     labels: {
-      list: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      get: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      create: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-      delete: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
+      list: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      get: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      create: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
+      delete: (
+        params: Record<string, unknown>,
+      ) => Promise<{ data: Record<string, unknown> }>;
     };
-    watch: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
-    stop: (params: Record<string, unknown>) => Promise<{ data: Record<string, unknown> }>;
+    watch: (
+      params: Record<string, unknown>,
+    ) => Promise<{ data: Record<string, unknown> }>;
+    stop: (
+      params: Record<string, unknown>,
+    ) => Promise<{ data: Record<string, unknown> }>;
   };
 }
 
@@ -89,7 +132,10 @@ interface GmailPayload {
   filename?: string;
 }
 
-const GMAIL_SYSTEM_LABELS: Record<string, { name: string; type: Folder['type'] }> = {
+const GMAIL_SYSTEM_LABELS: Record<
+  string,
+  { name: string; type: Folder['type'] }
+> = {
   INBOX: { name: 'Inbox', type: 'inbox' },
   SENT: { name: 'Sent', type: 'sent' },
   DRAFT: { name: 'Drafts', type: 'drafts' },
@@ -118,7 +164,10 @@ export class GmailProvider extends BaseProvider {
 
   async connect(): Promise<void> {
     try {
-      const { google } = await tryImport<GoogleApis>('googleapis', 'Gmail provider');
+      const { google } = await tryImport<GoogleApis>(
+        'googleapis',
+        'Gmail provider',
+      );
       this.auth = new google.auth.OAuth2(
         this.config.credentials.clientId,
         this.config.credentials.clientSecret,
@@ -148,7 +197,9 @@ export class GmailProvider extends BaseProvider {
     return this.gmail!;
   }
 
-  async listEmails(options: ListEmailsOptions = {}): Promise<ListResult<Email>> {
+  async listEmails(
+    options: ListEmailsOptions = {},
+  ): Promise<ListResult<Email>> {
     try {
       const q = this.buildSearchQuery(options);
       const params: Record<string, unknown> = {
@@ -236,7 +287,10 @@ export class GmailProvider extends BaseProvider {
     }
   }
 
-  async getAttachmentContent(emailId: string, attachmentId: string): Promise<Buffer> {
+  async getAttachmentContent(
+    emailId: string,
+    attachmentId: string,
+  ): Promise<Buffer> {
     try {
       const res = await this.api().users.messages.get({
         userId: 'me',
@@ -253,11 +307,15 @@ export class GmailProvider extends BaseProvider {
         return Buffer.from(attPart.body.data, 'base64url');
       }
 
-      const attRes = await (this.api().users.messages as unknown as {
-        attachments: {
-          get: (params: Record<string, unknown>) => Promise<{ data: { data: string } }>;
-        };
-      }).attachments.get({
+      const attRes = await (
+        this.api().users.messages as unknown as {
+          attachments: {
+            get: (
+              params: Record<string, unknown>,
+            ) => Promise<{ data: { data: string } }>;
+          };
+        }
+      ).attachments.get({
         userId: 'me',
         messageId: emailId,
         id: attachmentId,
@@ -277,7 +335,10 @@ export class GmailProvider extends BaseProvider {
       const raw = this.buildRawMessage(options);
       const res = await this.api().users.messages.send({
         userId: 'me',
-        requestBody: { raw },
+        requestBody: {
+          raw,
+          ...(options.threadId ? { threadId: options.threadId } : {}),
+        },
         auth: this.auth,
       });
       const data = res.data as { id: string; threadId: string };
@@ -292,7 +353,10 @@ export class GmailProvider extends BaseProvider {
     }
   }
 
-  async replyToEmail(emailId: string, options: ReplyOptions): Promise<SendResult> {
+  async replyToEmail(
+    emailId: string,
+    options: ReplyOptions,
+  ): Promise<SendResult> {
     try {
       const original = await this.getEmail(emailId);
       const to = options.replyAll
@@ -331,13 +395,20 @@ export class GmailProvider extends BaseProvider {
       });
       const data = res.data as { id: string; threadId: string };
       const sent = await this.fetchFullMessage(data.id);
-      return { id: data.id, threadId: data.threadId, messageId: sent.headers.messageId };
+      return {
+        id: data.id,
+        threadId: data.threadId,
+        messageId: sent.headers.messageId,
+      };
     } catch (err) {
       throw this.wrapError('Failed to reply to email', err);
     }
   }
 
-  async forwardEmail(emailId: string, options: ForwardOptions): Promise<SendResult> {
+  async forwardEmail(
+    emailId: string,
+    options: ForwardOptions,
+  ): Promise<SendResult> {
     try {
       const original = await this.getEmail(emailId);
       const subject = original.subject.startsWith('Fwd:')
@@ -383,7 +454,11 @@ export class GmailProvider extends BaseProvider {
       });
       const data = res.data as { id: string; threadId: string };
       const sent = await this.fetchFullMessage(data.id);
-      return { id: data.id, threadId: data.threadId, messageId: sent.headers.messageId };
+      return {
+        id: data.id,
+        threadId: data.threadId,
+        messageId: sent.headers.messageId,
+      };
     } catch (err) {
       throw this.wrapError('Failed to forward email', err);
     }
@@ -405,7 +480,10 @@ export class GmailProvider extends BaseProvider {
     }
   }
 
-  async updateDraft(draftId: string, options: SendEmailOptions): Promise<Email> {
+  async updateDraft(
+    draftId: string,
+    options: SendEmailOptions,
+  ): Promise<Email> {
     this.validateSendOptions(options);
     try {
       const raw = this.buildRawMessage(options);
@@ -633,7 +711,12 @@ export class GmailProvider extends BaseProvider {
         auth: this.auth,
       });
       const data = res.data as {
-        labels?: Array<{ id: string; name: string; type: string; color?: { backgroundColor: string } }>;
+        labels?: Array<{
+          id: string;
+          name: string;
+          type: string;
+          color?: { backgroundColor: string };
+        }>;
       };
       if (!data.labels) return [];
 
@@ -689,7 +772,11 @@ export class GmailProvider extends BaseProvider {
         requestBody,
         auth: this.auth,
       });
-      const data = res.data as { id: string; name: string; color?: { backgroundColor: string } };
+      const data = res.data as {
+        id: string;
+        name: string;
+        color?: { backgroundColor: string };
+      };
       return {
         id: data.id,
         name: data.name,
@@ -784,7 +871,10 @@ export class GmailProvider extends BaseProvider {
     }
   }
 
-  async searchNative(query: string, options: ListEmailsOptions = {}): Promise<ListResult<Email>> {
+  async searchNative(
+    query: string,
+    options: ListEmailsOptions = {},
+  ): Promise<ListResult<Email>> {
     return this.listEmails({ ...options, query });
   }
 
@@ -830,7 +920,20 @@ export class GmailProvider extends BaseProvider {
       references: headers.references?.split(/\s+/).filter(Boolean),
     };
     for (const [key, value] of Object.entries(headers)) {
-      if (!['message-id', 'in-reply-to', 'references', 'from', 'to', 'cc', 'bcc', 'subject', 'date', 'reply-to'].includes(key)) {
+      if (
+        ![
+          'message-id',
+          'in-reply-to',
+          'references',
+          'from',
+          'to',
+          'cc',
+          'bcc',
+          'subject',
+          'date',
+          'reply-to',
+        ].includes(key)
+      ) {
         emailHeaders[key] = value;
       }
     }
@@ -897,7 +1000,9 @@ export class GmailProvider extends BaseProvider {
         filename: part.filename,
         contentType: part.mimeType ?? 'application/octet-stream',
         size: part.body?.size ?? 0,
-        content: part.body?.data ? Buffer.from(part.body.data, 'base64url') : undefined,
+        content: part.body?.data
+          ? Buffer.from(part.body.data, 'base64url')
+          : undefined,
         contentId: undefined,
         isInline,
       });
@@ -905,7 +1010,10 @@ export class GmailProvider extends BaseProvider {
     return attachments;
   }
 
-  private walkParts(payload: GmailPayload, visitor: (part: GmailPayload) => void): void {
+  private walkParts(
+    payload: GmailPayload,
+    visitor: (part: GmailPayload) => void,
+  ): void {
     visitor(payload);
     if (payload.parts) {
       for (const part of payload.parts) {
@@ -914,7 +1022,10 @@ export class GmailProvider extends BaseProvider {
     }
   }
 
-  private findAttachmentPart(payload?: GmailPayload, attachmentId?: string): GmailPayload | null {
+  private findAttachmentPart(
+    payload?: GmailPayload,
+    attachmentId?: string,
+  ): GmailPayload | null {
     if (!payload || !attachmentId) return null;
     if (payload.body?.attachmentId === attachmentId) return payload;
     if (payload.parts) {
@@ -981,7 +1092,8 @@ export class GmailProvider extends BaseProvider {
     const cc = normalizeAddresses(options.cc);
     const bcc = normalizeAddresses(options.bcc);
     const boundary = `boundary_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const hasAttachments = options.attachments && options.attachments.length > 0;
+    const hasAttachments =
+      options.attachments && options.attachments.length > 0;
 
     const headerLines = [
       `To: ${to.map(formatEmailAddress).join(', ')}`,
@@ -993,7 +1105,8 @@ export class GmailProvider extends BaseProvider {
 
     if (options.replyTo) {
       const rt = normalizeAddresses(options.replyTo);
-      if (rt.length > 0) headerLines.push(`Reply-To: ${formatEmailAddress(rt[0])}`);
+      if (rt.length > 0)
+        headerLines.push(`Reply-To: ${formatEmailAddress(rt[0])}`);
     }
 
     if (options.headers) {
@@ -1011,7 +1124,9 @@ export class GmailProvider extends BaseProvider {
       if (options.text && options.html) {
         const altBoundary = `alt_${boundary}`;
         parts.push(`--${boundary}`);
-        parts.push(`Content-Type: multipart/alternative; boundary="${altBoundary}"`);
+        parts.push(
+          `Content-Type: multipart/alternative; boundary="${altBoundary}"`,
+        );
         parts.push('');
         parts.push(`--${altBoundary}`);
         parts.push('Content-Type: text/plain; charset="UTF-8"');
@@ -1040,19 +1155,26 @@ export class GmailProvider extends BaseProvider {
 
       for (const att of options.attachments!) {
         parts.push(`--${boundary}`);
-        parts.push(`Content-Type: ${att.contentType ?? 'application/octet-stream'}; name="${att.filename}"`);
-        parts.push(`Content-Disposition: attachment; filename="${att.filename}"`);
+        parts.push(
+          `Content-Type: ${att.contentType ?? 'application/octet-stream'}; name="${att.filename}"`,
+        );
+        parts.push(
+          `Content-Disposition: attachment; filename="${att.filename}"`,
+        );
         parts.push('Content-Transfer-Encoding: base64');
         parts.push('');
-        const content = typeof att.content === 'string'
-          ? att.content
-          : Buffer.from(att.content).toString('base64');
+        const content =
+          typeof att.content === 'string'
+            ? att.content
+            : Buffer.from(att.content).toString('base64');
         parts.push(content);
       }
       parts.push(`--${boundary}--`);
       body = parts.join('\r\n');
     } else if (options.text && options.html) {
-      headerLines.push(`Content-Type: multipart/alternative; boundary="${boundary}"`);
+      headerLines.push(
+        `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      );
       body = [
         `--${boundary}`,
         'Content-Type: text/plain; charset="UTF-8"',

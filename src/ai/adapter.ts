@@ -1,5 +1,10 @@
 import { z, type ZodError } from 'zod';
-import type { AiConfig, CompletionOptions, LLMAdapter, LLMAdapterType } from '../core/types.js';
+import type {
+  AiConfig,
+  CompletionOptions,
+  LLMAdapter,
+  LLMAdapterType,
+} from '../core/types.js';
 import { AiError, ValidationError } from '../core/errors.js';
 import { sleep } from '../core/utils.js';
 
@@ -16,7 +21,8 @@ export abstract class BaseLLMAdapter implements LLMAdapter {
   constructor(config: AiConfig) {
     this.apiKey = config.apiKey;
     this.model = config.model ?? this.getDefaultModel();
-    this.embeddingModel = config.embeddingModel ?? this.getDefaultEmbeddingModel();
+    this.embeddingModel =
+      config.embeddingModel ?? this.getDefaultEmbeddingModel();
     this.baseUrl = config.baseUrl;
     this.defaultTemperature = config.temperature ?? 0.3;
     this.defaultMaxTokens = config.maxTokens ?? 4096;
@@ -25,8 +31,15 @@ export abstract class BaseLLMAdapter implements LLMAdapter {
   protected abstract getDefaultModel(): string;
   protected abstract getDefaultEmbeddingModel(): string;
 
-  abstract complete(prompt: string, options?: CompletionOptions): Promise<string>;
-  abstract completeJSON<T>(prompt: string, schema: z.ZodType<T>, options?: CompletionOptions): Promise<T>;
+  abstract complete(
+    prompt: string,
+    options?: CompletionOptions,
+  ): Promise<string>;
+  abstract completeJSON<T>(
+    prompt: string,
+    schema: z.ZodType<T>,
+    options?: CompletionOptions,
+  ): Promise<T>;
   abstract embed(texts: string[]): Promise<number[][]>;
 
   protected async withRetry<T>(
@@ -72,12 +85,14 @@ export abstract class BaseLLMAdapter implements LLMAdapter {
   }
 
   protected parseJSON<T>(text: string, schema: z.ZodType<T>): T {
+    if (text.length > 100000)
+      throw new AiError('LLM output exceeds the safe size limit');
     const cleaned = this.extractJSON(text);
     let parsed: unknown;
     try {
       parsed = JSON.parse(cleaned);
     } catch {
-      throw new AiError(`LLM returned invalid JSON: ${text.slice(0, 200)}`);
+      throw new AiError('LLM returned invalid JSON');
     }
     const result = schema.safeParse(parsed);
     if (!result.success) {
@@ -98,9 +113,11 @@ export abstract class BaseLLMAdapter implements LLMAdapter {
     if (braceStart === -1 && bracketStart === -1) return text.trim();
 
     const start =
-      braceStart === -1 ? bracketStart
-      : bracketStart === -1 ? braceStart
-      : Math.min(braceStart, bracketStart);
+      braceStart === -1
+        ? bracketStart
+        : bracketStart === -1
+          ? braceStart
+          : Math.min(braceStart, bracketStart);
 
     const isArray = text[start] === '[';
     const closeChar = isArray ? ']' : '}';
@@ -143,7 +160,9 @@ export abstract class BaseLLMAdapter implements LLMAdapter {
 }
 
 function formatZodErrors(error: ZodError): string {
-  return error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+  return error.issues
+    .map((i) => `${i.path.join('.')}: ${i.message}`)
+    .join('; ');
 }
 
 export function createAdapter(config: AiConfig): LLMAdapter {
@@ -155,19 +174,23 @@ export function createAdapter(config: AiConfig): LLMAdapter {
 
   switch (adapterType) {
     case 'openai': {
-      const { OpenAIAdapter } = require('./adapters/openai.js') as typeof import('./adapters/openai.js');
+      const { OpenAIAdapter } =
+        require('./adapters/openai.js') as typeof import('./adapters/openai.js');
       return new OpenAIAdapter(config);
     }
     case 'anthropic': {
-      const { AnthropicAdapter } = require('./adapters/anthropic.js') as typeof import('./adapters/anthropic.js');
+      const { AnthropicAdapter } =
+        require('./adapters/anthropic.js') as typeof import('./adapters/anthropic.js');
       return new AnthropicAdapter(config);
     }
     case 'google': {
-      const { GoogleAdapter } = require('./adapters/google.js') as typeof import('./adapters/google.js');
+      const { GoogleAdapter } =
+        require('./adapters/google.js') as typeof import('./adapters/google.js');
       return new GoogleAdapter(config);
     }
     case 'ollama': {
-      const { OllamaAdapter } = require('./adapters/ollama.js') as typeof import('./adapters/ollama.js');
+      const { OllamaAdapter } =
+        require('./adapters/ollama.js') as typeof import('./adapters/ollama.js');
       return new OllamaAdapter(config);
     }
     default: {

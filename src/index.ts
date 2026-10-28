@@ -1304,3 +1304,8 @@ export { AutoArchiveEngine } from './auto-archive/engine.js';
 export { AutoLabelEngine } from './auto-labels/engine.js';
 export { AutoDraftsEngine } from './auto-drafts/engine.js';
 export { EmaiHub } from './hub/index.js';
+
+// Local business assistant: additive layer over existing providers and AI engines.
+export * from './assistant/types.js';
+export * from './assistant/engine.js';
+export * from './assistant/store.js';

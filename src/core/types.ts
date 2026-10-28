@@ -89,6 +89,8 @@ export interface Label {
 // ---------------------------------------------------------------------------
 
 export interface SendEmailOptions {
+  /** Optional provider conversation to keep an automatic acknowledgment in-thread. */
+  threadId?: string;
   to: string | string[] | EmailAddress | EmailAddress[];
   cc?: string | string[] | EmailAddress | EmailAddress[];
   bcc?: string | string[] | EmailAddress | EmailAddress[];
@@ -193,23 +195,19 @@ export interface ImapSmtpProviderConfig {
     port: number;
     secure?: boolean;
     auth:
-      | { user: string; pass: string }
-      | { user: string; accessToken: string };
+      { user: string; pass: string } | { user: string; accessToken: string };
   };
   smtp: {
     host: string;
     port: number;
     secure?: boolean;
     auth:
-      | { user: string; pass: string }
-      | { user: string; accessToken: string };
+      { user: string; pass: string } | { user: string; accessToken: string };
   };
 }
 
 export type ProviderConfig =
-  | GmailProviderConfig
-  | OutlookProviderConfig
-  | ImapSmtpProviderConfig;
+  GmailProviderConfig | OutlookProviderConfig | ImapSmtpProviderConfig;
 
 export interface EmailProvider {
   readonly type: ProviderType;
@@ -248,7 +246,10 @@ export interface EmailProvider {
   deleteLabel(labelId: string): Promise<void>;
 
   watch?(callback: (email: Email) => void): Promise<WatchHandle>;
-  searchNative?(query: string, options?: ListEmailsOptions): Promise<ListResult<Email>>;
+  searchNative?(
+    query: string,
+    options?: ListEmailsOptions,
+  ): Promise<ListResult<Email>>;
 }
 
 export interface WatchHandle {
@@ -282,9 +283,17 @@ export interface CompletionOptions {
 export interface LLMAdapter {
   readonly name: string;
   complete(prompt: string, options?: CompletionOptions): Promise<string>;
-  completeJSON<T>(prompt: string, schema: z.ZodType<T>, options?: CompletionOptions): Promise<T>;
+  completeJSON<T>(
+    prompt: string,
+    schema: z.ZodType<T>,
+    options?: CompletionOptions,
+  ): Promise<T>;
   embed(texts: string[]): Promise<number[][]>;
-  vision?(images: Array<{ data: Buffer | Uint8Array; mimeType: string }>, prompt: string, options?: CompletionOptions): Promise<string>;
+  vision?(
+    images: Array<{ data: Buffer | Uint8Array; mimeType: string }>,
+    prompt: string,
+    options?: CompletionOptions,
+  ): Promise<string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -368,7 +377,8 @@ export interface ExtractionResult<T = Record<string, unknown>> {
 // Search
 // ---------------------------------------------------------------------------
 
-export type VectorStoreType = 'memory' | 'sqlite' | 'pgvector' | 'pinecone' | 'weaviate' | 'chromadb';
+export type VectorStoreType =
+  'memory' | 'sqlite' | 'pgvector' | 'pinecone' | 'weaviate' | 'chromadb';
 
 export interface SearchConfig {
   store: VectorStoreType | VectorStore;
@@ -386,7 +396,11 @@ export interface VectorStore {
   readonly name: string;
   initialize(dimensions: number): Promise<void>;
   upsert(vectors: VectorEntry[]): Promise<void>;
-  search(vector: number[], limit: number, filter?: Record<string, unknown>): Promise<VectorSearchResult[]>;
+  search(
+    vector: number[],
+    limit: number,
+    filter?: Record<string, unknown>,
+  ): Promise<VectorSearchResult[]>;
   delete(ids: string[]): Promise<void>;
   count(): Promise<number>;
   close(): Promise<void>;
@@ -511,7 +525,10 @@ export interface SafetyConfig {
   blockedDomains?: string[];
   allowedDomains?: string[];
   maxRecipientsPerEmail?: number;
-  onApprovalRequired?: (email: SendEmailOptions, risks: Risk[]) => Promise<boolean>;
+  onApprovalRequired?: (
+    email: SendEmailOptions,
+    risks: Risk[],
+  ) => Promise<boolean>;
 }
 
 export interface SafetyPolicy {
@@ -529,7 +546,14 @@ export interface SafetyContext {
 }
 
 export interface Risk {
-  type: 'pii' | 'credential' | 'phishing' | 'malware' | 'policy' | 'domain' | 'custom';
+  type:
+    | 'pii'
+    | 'credential'
+    | 'phishing'
+    | 'malware'
+    | 'policy'
+    | 'domain'
+    | 'custom';
   severity: 'critical' | 'high' | 'medium' | 'low';
   description: string;
   location?: string;
@@ -593,14 +617,35 @@ export type EmaiEventMap = {
   'email:scheduled': { id: string; scheduledAt: string };
   'email:schedule-cancelled': { id: string };
   'email:undo': { emailId: string };
-  'email:opened': { emailId: string; timestamp: string; ip?: string; userAgent?: string };
-  'email:clicked': { emailId: string; url: string; timestamp: string; ip?: string; userAgent?: string };
-  'email:bounced': { emailId: string; type: 'hard' | 'soft'; reason: string; recipient?: string };
+  'email:opened': {
+    emailId: string;
+    timestamp: string;
+    ip?: string;
+    userAgent?: string;
+  };
+  'email:clicked': {
+    emailId: string;
+    url: string;
+    timestamp: string;
+    ip?: string;
+    userAgent?: string;
+  };
+  'email:bounced': {
+    emailId: string;
+    type: 'hard' | 'soft';
+    reason: string;
+    recipient?: string;
+  };
   'email:delivered': { emailId: string };
   'email:failed': { emailId: string; error: string };
   'reminder:due': { reminderId: string; emailId: string; subject: string };
   'reminder:replied': { reminderId: string; emailId: string };
-  'rule:triggered': { ruleId: string; ruleName: string; emailId: string; actions: string[] };
+  'rule:triggered': {
+    ruleId: string;
+    ruleName: string;
+    emailId: string;
+    actions: string[];
+  };
   'rule:error': { ruleId: string; error: string };
   'safety:risk': { emailId?: string; result: ScanResult };
   'safety:blocked': { emailId?: string; risks: Risk[] };

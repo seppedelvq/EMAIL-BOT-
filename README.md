@@ -1,3 +1,23 @@
+# Post — lokale zakelijke mailassistent
+
+Deze fork breidt de bestaande emai-bibliotheek uit met een Nederlandse lokale
+assistent, drie schermen en een veilige demo. De oorspronkelijke documentatie
+staat hieronder ongewijzigd.
+
+**Start:** Node.js 24 LTS installeren, dan `npm run assistant:setup` en
+`npm run assistant:dev`. Open http://localhost:4000.
+
+- [Installatie, configuratie, functies en kosten](docs/assistant/INSTALLATIE.md)
+- [Architectuuranalyse en plan](docs/assistant/PLAN.md)
+- [Validatie en resterende releasevoorwaarden](docs/assistant/VALIDATIE.md)
+- [Licenties en beveiliging](docs/assistant/SECURITY-LICENSING.md)
+
+Demo werkt zonder echte mailbox. Live Gmail, modelkwaliteit en OS-installatie
+moeten met gecontroleerde accounts/hardware worden gevalideerd vóór klantverkoop.
+Automatische verzending staat standaard uit. Geen publieke hosting geconfigureerd.
+
+---
+
 <p align="center">
   <h1 align="center">emai</h1>
   <p align="center">AI-first unified email toolkit for agents</p>
